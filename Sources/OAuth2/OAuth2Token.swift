@@ -13,7 +13,7 @@ import Foundation
 /**
 Represents an OAuth 2 Token
 */
-public class OAuth2Token {
+public class OAuth2Token : Codable {
 	public let accessToken: String
 	public let refreshToken: String?
 	public let expiration: Date?
@@ -21,15 +21,15 @@ public class OAuth2Token {
 	public let instanceURL: String?
 	public let idURL: String?
 	public let scope: [String]?
-	public let webToken: [String: Any]?
+    public let webToken: [String: String]?
 
-	public init(accessToken: String, tokenType: String, instanceURL: String? = nil, idURL: String? = nil, expiresIn: Int? = nil, refreshToken: String? = nil, scope: [String]? = nil, webToken: [String: Any]? = nil) {
+	public init(accessToken: String, tokenType: String, instanceURL: String? = nil, idURL: String? = nil, expiresIn: Int? = nil, refreshToken: String? = nil, scope: [String]? = nil, webToken: [String: String]? = nil) {
 		self.accessToken = accessToken
 		self.tokenType = tokenType
 		self.refreshToken = refreshToken
 		self.expiration = expiresIn == nil ? nil : Date(timeIntervalSinceNow: Double(expiresIn!))
 		self.scope = scope
-		self.webToken = webToken
+        self.webToken = webToken
 		self.instanceURL = instanceURL
 		self.idURL = idURL
 	}
@@ -48,12 +48,13 @@ public class OAuth2Token {
 		let expiresIn = json["expires_in"] as? Int
 		let refreshToken: String? = json["refresh_token"] as? String
 		let scope = (json["scope"] as? String)?.components(separatedBy: " ")
-		let webToken = OAuth2Token.decodeWebToken(json: json)
+        let webToken = OAuth2Token.decodeWebToken(json: json)
 		self.init(accessToken: accessToken, tokenType: tokenType, instanceURL: instanceURL, idURL: idURL, expiresIn: expiresIn, refreshToken: refreshToken, scope: scope, webToken: webToken)
 	}
 
-	private static func decodeWebToken(json: [String: Any]) -> [String: Any]? {
+	private static func decodeWebToken(json: [String: Any]) -> [String: String]? {
 		var webToken: [String: Any]?
+        var returnToken : [String:String]?
 
 		/// Decode Google Json web token
 		if let id = json["id_token"] as? String {
@@ -69,11 +70,16 @@ public class OAuth2Token {
 				let str = String(data: data, encoding: String.Encoding.utf8) {
 				do {
 					webToken = try str.jsonDecode() as? [String : Any]
+                    for (f,v) in webToken! {
+                        returnToken?[f] = String(describing: v)
+                    }
 				} catch {
 				}
 			}
 		}
 
-		return webToken
+		return returnToken
 	}
+    
+    
 }

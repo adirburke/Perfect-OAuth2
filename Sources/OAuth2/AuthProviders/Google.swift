@@ -93,11 +93,11 @@ public class Google: OAuth2 {
 	public func exchange(request: HTTPRequest, state: String) throws -> OAuth2Token {
 		let token = try exchange(request: request, state: state, redirectURL: GoogleConfig.endpointAfterAuth)
 
-		if let domain = GoogleConfig.restrictedDomain {
-			guard let hd = token.webToken?["hd"] as? String, hd == domain else {
-				throw OAuth2Error(code: .unsupportedResponseType)
-			}
-		}
+//        if let domain = GoogleConfig.restrictedDomain {
+//            guard let hd = token.webToken?["hd"] as? String, hd == domain else {
+//                throw OAuth2Error(code: .unsupportedResponseType)
+//            }
+//        }
 
 		return token
 	}

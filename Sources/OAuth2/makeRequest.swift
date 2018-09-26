@@ -15,6 +15,79 @@ import PerfectHTTP
 extension OAuth2 {
 
 
+    public func makeRequestAsync(
+        _ method: HTTPMethod,
+        _ url: String,
+        body: String = "",
+        encoding: String = "JSON",
+        bearerToken: String = "", complete: (([String:Any]) -> ())? = nil
+        //        ) -> (Int, [String:Any], [String:Any], HTTPHeaderParser) {
+        ) {
+        
+        let curlObject = CURL(url: url)
+        curlObject.setOption(CURLOPT_HTTPHEADER, s: "Accept: application/json")
+        curlObject.setOption(CURLOPT_HTTPHEADER, s: "Cache-Control: no-cache")
+        curlObject.setOption(CURLOPT_USERAGENT, s: "PerfectAPI2.0")
+        
+        if !bearerToken.isEmpty {
+            curlObject.setOption(CURLOPT_HTTPHEADER, s: "Authorization: Bearer \(bearerToken)")
+        }
+        
+        switch method {
+        case .post :
+            let byteArray = [UInt8](body.utf8)
+            curlObject.setOption(CURLOPT_POST, int: 1)
+            curlObject.setOption(CURLOPT_POSTFIELDSIZE, int: byteArray.count)
+            curlObject.setOption(CURLOPT_COPYPOSTFIELDS, v: UnsafeMutablePointer(mutating: byteArray))
+            
+            if encoding == "form" {
+                curlObject.setOption(CURLOPT_HTTPHEADER, s: "Content-Type: application/x-www-form-urlencoded")
+            } else {
+                curlObject.setOption(CURLOPT_HTTPHEADER, s: "Content-Type: application/json")
+            }
+            
+        default: //.get :
+            curlObject.setOption(CURLOPT_HTTPGET, int: 1)
+        }
+        
+        curlObject.perform { (code, header, bodyIn) in
+            var data = [String:Any]()
+            // Parsing now:
+            
+            // assember the header from a binary byte array to a string
+            //        let headerStr = String(bytes: header, encoding: String.Encoding.utf8)
+            
+            // parse the header
+            //        let http = HTTPHeaderParser(header:headerStr!)
+            
+            // assamble the body from a binary byte array to a string
+            let content = String(bytes:bodyIn, encoding:String.Encoding.utf8)
+            
+            // prepare the failsafe content.
+            //        raw = ["status": http.status, "header": headerStr!, "body": content!]
+            
+            // parse the body data into a json convertible
+            do {
+                if (content?.count)! > 0 {
+                    if (content?.starts(with: "["))! {
+                        let arr = try content?.jsonDecode() as! [Any]
+                        data["response"] = arr
+                    } else {
+                        data = try content?.jsonDecode() as! [String : Any]
+                    }
+                }
+                complete?(data)
+                //            return (http.code, data, raw, http)
+            } catch {
+                complete?([:])
+                //            return (http.code, [:], raw, http)
+            }
+        }
+        
+        
+
+    }
+    
 	/// The function that triggers the specific interaction with a remote server
 	/// Parameters:
 	/// - method: The HTTP Method enum, i.e. .get, .post
@@ -22,7 +95,7 @@ extension OAuth2 {
 	/// - body: The JSON formatted sring to sent to the server
 	/// Response:
 	/// (HTTPResponseStatus, "data" - [String:Any], "raw response" - [String:Any], HTTPHeaderParser)
-	func makeRequest(
+	public func makeRequest(
 		_ method: HTTPMethod,
 		_ url: String,
 		body: String = "",
