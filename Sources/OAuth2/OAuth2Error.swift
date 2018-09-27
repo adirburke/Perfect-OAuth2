@@ -76,6 +76,13 @@ public enum OAuth2ErrorCode: String {
     /// The OAuth server is busy
     temporarilyUnavailable = "temporarily_unavailable"
 }
+public struct NoRefreshToken : Error {
+    /// User-presentable error message
+    public let description = "No Refresh Token"
+    
+    /// Empty initializer
+    public init() {}
+}
 
 /// The API Response was not expected. This could be an API server error or library error
 public struct InvalidAPIResponse: Error {

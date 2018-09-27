@@ -94,6 +94,7 @@ open class OAuth2 {
     }
     
     // TODO: add refresh token support
+    
 }
 
 extension URLComponents {

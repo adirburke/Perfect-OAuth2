@@ -55,6 +55,7 @@ public class Google: OAuth2 {
 	public init(clientID: String, clientSecret: String) {
 		let tokenURL = "https://www.googleapis.com/oauth2/v4/token"
 		let authorizationURL = "https://accounts.google.com/o/oauth2/auth"
+        
 		super.init(clientID: clientID, clientSecret: clientSecret, authorizationURL: authorizationURL, tokenURL: tokenURL)
 	}
 
@@ -157,10 +158,40 @@ public class Google: OAuth2 {
 		}
 	}
 
+    public func refreshToken(token : OAuth2Token) throws -> OAuth2Token {
 
+        guard let refreshToken = token.refreshToken else {
+            throw NoRefreshToken()
+        }
+        let postBody = ["grant_type": "refresh_token",
+                        "client_id": clientID,
+                        "client_secret": clientSecret,
+                        "refresh_token": refreshToken
+                        ]
 
+        let data = makeRequest(.post, tokenURL, body: urlencode(dict: postBody), encoding: "form")
 
+        guard let token = OAuth2Token(json: data) else {
+            if let error = OAuth2Error(json: data) {
+                throw error
+            } else {
+                throw InvalidAPIResponse()
+            }
+        }
+        return token
+        
+    }
 
+    public func checkToken(token : OAuth2Token) -> Bool {
+        guard let expiration = token.expiration else {
+            return false
+        }
+        if expiration < Date() {
+            return true
+        }
+        return false
+    }
+    
 	/// Route handler for managing the sending of the user to the OAuth provider for approval/login
 	/// Route definition would be in the form
 	/// ["method":"get", "uri":"/to/google", "handler":Google.sendToProvider]
