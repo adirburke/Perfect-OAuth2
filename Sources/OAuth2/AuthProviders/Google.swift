@@ -107,7 +107,8 @@ public class Google: OAuth2 {
 	public func getLoginLink(state: String, request: HTTPRequest, scopes: [String] = ["profile"]) -> String {
 		//?session=\((request.session?.token)!)
 		//print("OAUTH2DEBUG FROM WITH \(request.session?.token)")
-		return getLoginLink(redirectURL: GoogleConfig.endpointAfterAuth, state: state, scopes: scopes)
+        let (address, port) = request.serverAddress
+        return getLoginLink(redirectURL: "http://\(address):\(port)\(GoogleConfig.endpointAfterAuth)", state: state, scopes: scopes)
 		//		var url = getLoginLink(redirectURL: "\(GoogleConfig.endpointAfterAuth)", state: state, scopes: scopes)
 		//		if let domain = GoogleConfig.restrictedDomain {
 		//			url += "&hd=\(domain)"
