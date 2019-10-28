@@ -9,6 +9,7 @@
 
 import Foundation
 import PerfectHTTP
+import PerfectNet
 
 /**
  OAuth 2 represents the base API Client for an OAuth 2 server that implements the
@@ -90,7 +91,10 @@ open class OAuth2 {
 				print("Where's the code?")
                 throw InvalidAPIResponse()
         }
-        return try exchange(authorizationCode: AuthorizationCode(code: code, redirectURL: redirectURL))
+        var (address, port) = request.serverAddress
+        let witess = (request.connection is NetTCPSSL) ? "https" : "http"
+        address = GoogleConfig.reverseDomain ?? address
+        return try exchange(authorizationCode: AuthorizationCode(code: code, redirectURL: "\(witess)://\(address):\(port)\(redirectURL)"))
     }
     
     // TODO: add refresh token support

@@ -23,6 +23,7 @@
 import Foundation
 import PerfectHTTP
 import PerfectSession
+import PerfectNet
 
 /// Google configuration singleton
 public struct GoogleConfig {
@@ -41,6 +42,10 @@ public struct GoogleConfig {
 
 	/// Domain restriction if needed
 	public static var restrictedDomain: String?
+    
+    /// Domain resolved from
+    
+    public static var reverseDomain : String?
 
 	public init(){}
 }
@@ -92,6 +97,7 @@ public class Google: OAuth2 {
 
 	/// Google-specific exchange function
 	public func exchange(request: HTTPRequest, state: String) throws -> OAuth2Token {
+        
 		let token = try exchange(request: request, state: state, redirectURL: GoogleConfig.endpointAfterAuth)
 
 //        if let domain = GoogleConfig.restrictedDomain {
@@ -107,8 +113,10 @@ public class Google: OAuth2 {
 	public func getLoginLink(state: String, request: HTTPRequest, scopes: [String] = ["profile"]) -> String {
 		//?session=\((request.session?.token)!)
 		//print("OAUTH2DEBUG FROM WITH \(request.session?.token)")
-        let (address, port) = request.serverAddress
-        return getLoginLink(redirectURL: "http://\(address):\(port)\(GoogleConfig.endpointAfterAuth)", state: state, scopes: scopes)
+        var (address, port) = request.serverAddress
+        let witess = (request.connection is NetTCPSSL) ? "https" : "http"
+        address = GoogleConfig.reverseDomain ?? address
+        return getLoginLink(redirectURL: "\(witess)://\(address):\(port)\(GoogleConfig.endpointAfterAuth)", state: state, scopes: scopes)
 		//		var url = getLoginLink(redirectURL: "\(GoogleConfig.endpointAfterAuth)", state: state, scopes: scopes)
 		//		if let domain = GoogleConfig.restrictedDomain {
 		//			url += "&hd=\(domain)"
