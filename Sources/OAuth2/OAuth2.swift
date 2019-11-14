@@ -52,6 +52,8 @@ open class OAuth2 {
 		url += "&redirect_uri=\(redirectURL.stringByEncodingURL)"
 		url += "&state=\(state.stringByEncodingURL)"
 		url += "&scope=\((scopes.joined(separator: " ")).stringByEncodingURL)"
+        url += "&access_type=offline"
+        url += "&prompt=consent"
 		return url
     }
     
