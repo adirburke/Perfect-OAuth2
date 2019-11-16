@@ -51,6 +51,17 @@ public class OAuth2Token : Codable {
         let webToken = OAuth2Token.decodeWebToken(json: json)
 		self.init(accessToken: accessToken, tokenType: tokenType, instanceURL: instanceURL, idURL: idURL, expiresIn: expiresIn, refreshToken: refreshToken, scope: scope, webToken: webToken)
 	}
+    
+    public init(previousToken : OAuth2Token, refreshToken : String) {
+        self.accessToken = previousToken.accessToken
+        self.tokenType = previousToken.tokenType
+        self.refreshToken = refreshToken
+        self.expiration = previousToken.expiration
+        self.scope = previousToken.scope
+        self.webToken = previousToken.webToken
+        self.instanceURL = previousToken.instanceURL
+        self.idURL = previousToken.idURL
+    }
 
 	private static func decodeWebToken(json: [String: Any]) -> [String: String]? {
 		var webToken: [String: Any]?

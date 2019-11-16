@@ -191,7 +191,7 @@ public class Google: OAuth2 {
         
     }
 
-    public func checkToken(token : OAuth2Token) -> Bool {
+    public func checkTokenValid(token : OAuth2Token) -> Bool {
         guard let expiration = token.expiration else {
             return false
         }
