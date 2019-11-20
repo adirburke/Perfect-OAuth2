@@ -27,7 +27,8 @@ public class OAuth2Token : Codable {
 		self.accessToken = accessToken
 		self.tokenType = tokenType
 		self.refreshToken = refreshToken
-		self.expiration = expiresIn == nil ? nil : Date(timeIntervalSinceNow: Double(expiresIn!))
+
+        self.expiration = expiresIn == nil ? nil : Date().addingTimeInterval(TimeInterval(expiresIn!))
 		self.scope = scope
         self.webToken = webToken
 		self.instanceURL = instanceURL

@@ -195,7 +195,7 @@ public class Google: OAuth2 {
         guard let expiration = token.expiration else {
             return false
         }
-        if expiration <= Date() {
+        if expiration >= Date() {
             return true
         }
         return false
