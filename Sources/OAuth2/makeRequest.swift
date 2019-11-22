@@ -12,11 +12,54 @@ import cURL
 import PerfectHTTP
 
 
+import AsyncHTTPClient
+import NIOHTTP1
+
 extension OAuth2 {
 
+    
+    public func makeRequestNIO(
+        _ method: NIOHTTP1.HTTPMethod,
+    _ url: String,
+    body: String = "",
+    encoding: String = "JSON",
+    bearerToken: String = "", complete: (([String:Any]) -> ())? = nil
+    //        ) -> (Int, [String:Any], [String:Any], HTTPHeaderParser) {
+    )  {
+        let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+        defer {
+            try? httpClient.syncShutdown()
+        }
+        
+        do {
+        
+            var request = try HTTPClient.Request(url: url, method: method)
+            
+            
+            
+            
+            
+            
+            
+            
+//            (url: url, method: method, headers: .init([
+//            "Accept", "application/json",
+//            "Cache-Control", "no-cache",
+//            "Authorization", "Bearer \(bearerToken)"
+//
+//            ]), body: body)
+        
+        
+        
+        } catch {
+            print(error)
+        }
+        
+        
+    }
 
     public func makeRequestAsync(
-        _ method: HTTPMethod,
+        _ method: PerfectHTTP.HTTPMethod,
         _ url: String,
         body: String = "",
         encoding: String = "JSON",
@@ -96,7 +139,7 @@ extension OAuth2 {
 	/// Response:
 	/// (HTTPResponseStatus, "data" - [String:Any], "raw response" - [String:Any], HTTPHeaderParser)
 	public func makeRequest(
-		_ method: HTTPMethod,
+        _ method: PerfectHTTP.HTTPMethod,
 		_ url: String,
 		body: String = "",
 		encoding: String = "JSON",
