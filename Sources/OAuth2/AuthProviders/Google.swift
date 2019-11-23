@@ -178,7 +178,9 @@ public class Google: OAuth2 {
                         "refresh_token": refreshToken
                         ]
 
-        let data = makeRequest(.post, tokenURL, body: urlencode(dict: postBody), encoding: "form")
+//        let testTokenURL = "https://localhost:7979/test"
+        let testTokenURL = tokenURL
+        let data = makeRequest(.post, testTokenURL, body: urlencode(dict: postBody), encoding: "form")
 
         guard let token = OAuth2Token(json: data) else {
             if let error = OAuth2Error(json: data) {

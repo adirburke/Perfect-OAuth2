@@ -11,13 +11,16 @@ import PerfectCURL
 import cURL
 import PerfectHTTP
 
+import Foundation
+
 
 import AsyncHTTPClient
 import NIOHTTP1
 
 extension OAuth2 {
     
-    static let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+    static let httpClient = HTTPClient(eventLoopGroupProvider: .createNew, configuration: .init(tlsConfiguration: nil, redirectConfiguration: nil, timeout: .init(), proxy: nil, ignoreUncleanSSLShutdown: true, decompression: .disabled))
+//    static let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
     
     static public func makeRequestNIO(
         _ method: NIOHTTP1.HTTPMethod,
@@ -34,11 +37,13 @@ extension OAuth2 {
         do {
             
             var request = try HTTPClient.Request(url: url, method: method)
-            request.headers.add(name: "Accept", value: "application/json")
-            request.headers.add(name: "Cache-Control", value: "no-cache")
+//            request.headers.add(name: "Accept", value: "application/json")
+//            request.headers.add(name: "Cache-Control", value: "no-cache")
+            request.headers.add(name: "user-agent", value: "adir-test-app")
             if !bearerToken.isEmpty {
                 request.headers.add(name: "Authorization", value: "Bearer \(bearerToken)")
             }
+            request.body = .string(body)
             
             switch method {
             case .POST:
@@ -48,56 +53,54 @@ extension OAuth2 {
                 {
                     request.headers.add(name: "Content-Type", value: "application/json")
                 }
+                request.headers.add(name: "Content-length", value: "\(request.body?.length ?? 0)")
             default:
                 break
             }
-            
+//            request.body = nil
             request.body = .string(body)
-            
+
             httpClient.execute(request: request).whenComplete { result in
                 var data = [String:Any]()
-                //                print(result)
                 switch result {
                 case .failure(let error):
                     print(error)
                 case .success(let response):
+                    print(response.status)
+           
                     if response.status == .ok {
-                        // handle response
-                        //                        print(response.body)
-                        let responseBody = response.body
-                        let content = responseBody?.getString(at: 0, length: responseBody?.capacity ?? 0)
+   
+                        #warning("Clean up the conversion or abstract away")
+                        let bytes = response.body.flatMap { $0.getBytes(at: 0, length: $0.readableBytes )}
+                                   let string = String(decoding: bytes!, as: UTF8.self)
+                        let content = string
                         
-                        print(content)
+                        
+                        
                         do {
-                            if (content?.count)! > 0 {
-                                if (content?.starts(with: "["))! {
-                                    let arr = try content?.jsonDecode() as! [Any]
+                            #warning("Clean up the conversion or abstract away")
+                            if content.count > 0 {
+                                if (content.starts(with: "[")) {
+                                    let arr = try content.jsonDecode() as! [Any]
                                     data["response"] = arr
                                 } else {
-                                    data = try content?.jsonDecode() as! [String : Any]
+                                    data = try content.jsonDecode() as! [String : Any]
                                 }
                             }
+                            
+                            
                             complete?(data)
-                            //            return (http.code, data, raw, http)
+                         
                         } catch {
                             complete?([:])
-                            //            return (http.code, [:], raw, http)
+                  
                         }
                     } else {
+                           complete?([:])
                         // handle remote error
                     }
                 }
-                
-                //                try? httpClient.syncShutdown()
             }
-            //            (url: url, method: method, headers: .init([
-            //            "Accept", "application/json",
-            //            "Cache-Control", "no-cache",
-            //            "Authorization", "Bearer \(bearerToken)"
-            //
-            //            ]), body: body)
-            
-            
             
         } catch {
             print(error)
@@ -179,6 +182,13 @@ extension OAuth2 {
         
     }
     
+    
+    private static let waitTime = 5
+    private static let semaphoreValue = 0
+    private static var timeOut : DispatchTime{
+        return DispatchTime.now() + .seconds(waitTime)
+    }
+    
     /// The function that triggers the specific interaction with a remote server
     /// Parameters:
     /// - method: The HTTP Method enum, i.e. .get, .post
@@ -196,10 +206,21 @@ extension OAuth2 {
     ) -> ([String:Any]) {
         
     
-        
-        OAuth2.makeRequestNIO(method.convert(), url, body: body, encoding: encoding, bearerToken: bearerToken) {
+        var returnValue = [String:Any]()
+        let semaphore = DispatchSemaphore(value: OAuth2.semaphoreValue)
+        let newMethod  = method.convert()
+        print(newMethod.rawValue)
+        OAuth2.makeRequestNIO(newMethod, url, body: body, encoding: encoding, bearerToken: bearerToken) { result in
+            returnValue = result
+            print(result)
             
+            
+            semaphore.signal()
         }
+        _ = semaphore.wait(timeout: OAuth2.timeOut)
+        return returnValue
+        
+        
 //        let curlObject = CURL(url: url)
 //        curlObject.setOption(CURLOPT_HTTPHEADER, s: "Accept: application/json")
 //        curlObject.setOption(CURLOPT_HTTPHEADER, s: "Cache-Control: no-cache")
@@ -290,6 +311,34 @@ extension OAuth2 {
 
 extension PerfectHTTP.HTTPMethod {
     func convert() -> NIOHTTP1.HTTPMethod {
-        return NIOHTTP1.HTTPMethod(rawValue: self.description)
+        print(self.description)
+        
+        
+        switch self {
+    
+        case .options:
+            return .OPTIONS
+        case .get:
+            return .GET
+        case .head:
+            return .HEAD
+        case .post:
+            return .POST
+        case .patch:
+            return .PATCH
+        case .put:
+            return .PUT
+        case .delete:
+            return .DELETE
+        case .trace:
+            return .TRACE
+        case .connect:
+            return .CONNECT
+        case .custom(let s):
+            return NIOHTTP1.HTTPMethod(rawValue: s)
+        @unknown default:
+            return NIOHTTP1.HTTPMethod(rawValue: self.description)
+        }
+        
     }
 }
