@@ -11,6 +11,9 @@ import Foundation
 import PerfectHTTP
 import PerfectNet
 
+import NIO
+import NIOFoundationCompat
+
 /**
  OAuth 2 represents the base API Client for an OAuth 2 server that implements the
  authorization code grant type. This is the typical redirect based login flow.
@@ -81,22 +84,36 @@ open class OAuth2 {
         return token
     }
     
+    open func exchangeAsync(authorizationCode: AuthorizationCode) throws -> EventLoopFuture<OAuth2Token> {
+    let postBody = ["grant_type": "authorization_code",
+                           "client_id": clientID,
+                           "client_secret": clientSecret,
+                           "redirect_uri": authorizationCode.redirectURL,
+                           "code": authorizationCode.code]
+        
+        let data = try OAuth2.makeRequestNIO(.POST, tokenURL, body: urlencode(dict: postBody), encoding: "form")
+        
+        return data.flatMapThrowing { response in
+                let decoder = JSONDecoder()
+                return try decoder.decode(OAuth2Token.self, from: response.body!)
+        }
+    
+    }
+    
     /// Parses a URL and exchanges the OAuth 2 access token and exchanges it for an access token
     /// - throws: InvalidAuthorizationCodeError() if the Authorization Code could not be validated
     /// - throws: APIConnectionError() if we cannot connect to the OAuth server
     /// - throws: InvalidAPIResponse() if the server does not respond in a way we expect
     /// - throws: OAuth2Error() if the oauth server calls back with an error
-	open func exchange(request: HTTPRequest, state: String, redirectURL: String) throws -> OAuth2Token {
+	open func exchange(request: ServerInfo, state: String, redirectURL: String) throws -> OAuth2Token {
 		//request.param(name: "state") == state
-		guard let code = request.param(name: "code")
+        guard let code = request.code
              else {
 				print("Where's the code?")
                 throw InvalidAPIResponse()
         }
-        var (address, port) = request.serverAddress
-        let witess = (request.connection is NetTCPSSL) ? "https" : "http"
-        address = GoogleConfig.reverseDomain ?? address
-        return try exchange(authorizationCode: AuthorizationCode(code: code, redirectURL: "\(witess)://\(address):\(port)\(redirectURL)"))
+        let address = GoogleConfig.reverseDomain ?? request.serverName
+        return try exchange(authorizationCode: AuthorizationCode(code: code, redirectURL: "\(request.scheme)://\(address):\(request.port)\(redirectURL)"))
     }
     
     // TODO: add refresh token support

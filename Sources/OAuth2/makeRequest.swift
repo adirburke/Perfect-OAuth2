@@ -17,6 +17,7 @@ import Foundation
 import AsyncHTTPClient
 import NIOHTTP1
 import NIO
+import NIOFoundationCompat
 
 extension OAuth2 {
     
@@ -62,16 +63,8 @@ extension OAuth2 {
         encoding: String = "JSON",
         bearerToken: String = "", complete: (([String:Any]) -> ())? = nil
     )  {
-        
-        //        defer {
-        //            try? httpClient.syncShutdown()
-        //        }
-        //
         do {
-            
             var request = try HTTPClient.Request(url: url, method: method)
-//            request.headers.add(name: "Accept", value: "application/json")
-//            request.headers.add(name: "Cache-Control", value: "no-cache")
             request.headers.add(name: "user-agent", value: "adir-test-app")
             if !bearerToken.isEmpty {
                 request.headers.add(name: "Authorization", value: "Bearer \(bearerToken)")
@@ -82,8 +75,7 @@ extension OAuth2 {
             case .POST:
                 if encoding == "form" {
                     request.headers.add(name: "Content-Type", value: "application/x-www-form-urlencoded")
-                } else
-                {
+                } else {
                     request.headers.add(name: "Content-Type", value: "application/json")
                 }
                 request.headers.add(name: "Content-length", value: "\(request.body?.length ?? 0)")
@@ -105,7 +97,12 @@ extension OAuth2 {
    
                         #warning("Clean up the conversion or abstract away")
                         let bytes = response.body.flatMap { $0.getBytes(at: 0, length: $0.readableBytes )}
-                                   let string = String(decoding: bytes!, as: UTF8.self)
+//                        let dataResponse = Data(bytes: bytes!)
+//                        let decoder = JSONDecoder()
+//                        print(String(data: dataResponse, encoding: .utf8))
+//                        let test = try? decoder.decode(OAuth2Token.self, from: response.body!)
+                        
+                        let string = String(decoding: bytes!, as: UTF8.self)
                         let content = string
                         
                         
@@ -246,8 +243,6 @@ extension OAuth2 {
         OAuth2.makeRequestNIO(newMethod, url, body: body, encoding: encoding, bearerToken: bearerToken) { result in
             returnValue = result
             print(result)
-            
-            
             semaphore.signal()
         }
         _ = semaphore.wait(timeout: OAuth2.timeOut)
