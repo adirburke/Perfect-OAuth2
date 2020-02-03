@@ -57,6 +57,7 @@ public class OAuth2Token : Codable {
         self.accessToken = try values.decode(String.self, forKey: .accessToken)
         self.tokenType = try? values.decode(String.self, forKey: .tokenType)
         self.refreshToken = try? values.decode(String.self, forKey: .refreshToken)
+        let test = try? values.decode(Date.self, forKey: .expiration)
         let expiresIn = try? values.decode(Int.self, forKey: .expiration)
         self.expiration = Date().addingTimeInterval(TimeInterval(expiresIn ?? 3660))
         self.scope = try? values.decode(String.self, forKey: .scope).components(separatedBy: " ")
@@ -64,7 +65,19 @@ public class OAuth2Token : Codable {
         self.webToken = OAuth2Token.decodeWebToken(string: json)
         self.instanceURL = try? values.decode(String.self, forKey: .instanceURL)
         self.idURL = try? values.decode(String.self, forKey: .idURL)
-        
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(accessToken, forKey: .accessToken)
+        try container.encode(tokenType, forKey: .tokenType)
+        try container.encode(refreshToken, forKey: .refreshToken)
+        let expiresIn = expiration?.timeIntervalSince(Date()) ?? 0
+        try container.encode(expiresIn, forKey: .expiration)
+        try container.encode(scope, forKey: .scope)
+        try container.encode(webToken, forKey: .webToken)
+        try container.encode(instanceURL, forKey: .instanceURL)
+        try container.encode(idURL, forKey: .idURL)
     }
 
     
