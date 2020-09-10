@@ -72,7 +72,7 @@ open class OAuth2 {
                         "redirect_uri": authorizationCode.redirectURL,
                         "code": authorizationCode.code]
 //		let (_, data, _, _) = makeRequest(.post, tokenURL, body: urlencode(dict: postBody), encoding: "form")
-		let data = makeRequest(.post, tokenURL, body: urlencode(dict: postBody), encoding: "form")
+        let data = makeRequest(.POST, tokenURL, body: urlencode(dict: postBody), encoding: "form")
 //        print(#function, data, postBody)
         guard let token = OAuth2Token(json: data) else {
             if let error = OAuth2Error(json: data) {

@@ -6,10 +6,8 @@
 //	Branched from CouchDB Version
 
 
-import PerfectLib
-import PerfectCURL
-import cURL
-import PerfectHTTP
+//import PerfectLib
+//import PerfectHTTP
 
 import Foundation
 
@@ -139,79 +137,6 @@ extension OAuth2 {
         
     }
     
-    public func makeRequestAsync(
-        _ method: PerfectHTTP.HTTPMethod,
-        _ url: String,
-        body: String = "",
-        encoding: String = "JSON",
-        bearerToken: String = "", complete: (([String:Any]) -> ())? = nil
-        //        ) -> (Int, [String:Any], [String:Any], HTTPHeaderParser) {
-    ) {
-        
-        let curlObject = CURL(url: url)
-        curlObject.setOption(CURLOPT_HTTPHEADER, s: "Accept: application/json")
-        curlObject.setOption(CURLOPT_HTTPHEADER, s: "Cache-Control: no-cache")
-        curlObject.setOption(CURLOPT_USERAGENT, s: "PerfectAPI2.0")
-        
-        if !bearerToken.isEmpty {
-            curlObject.setOption(CURLOPT_HTTPHEADER, s: "Authorization: Bearer \(bearerToken)")
-        }
-        
-        switch method {
-        case .post :
-            let byteArray = [UInt8](body.utf8)
-            curlObject.setOption(CURLOPT_POST, int: 1)
-            curlObject.setOption(CURLOPT_POSTFIELDSIZE, int: byteArray.count)
-            curlObject.setOption(CURLOPT_COPYPOSTFIELDS, v: UnsafeMutablePointer(mutating: byteArray))
-            
-            if encoding == "form" {
-                curlObject.setOption(CURLOPT_HTTPHEADER, s: "Content-Type: application/x-www-form-urlencoded")
-            } else {
-                curlObject.setOption(CURLOPT_HTTPHEADER, s: "Content-Type: application/json")
-            }
-            
-        default: //.get :
-            curlObject.setOption(CURLOPT_HTTPGET, int: 1)
-        }
-        
-        curlObject.perform { (code, header, bodyIn) in
-            var data = [String:Any]()
-            // Parsing now:
-            
-            // assember the header from a binary byte array to a string
-            //        let headerStr = String(bytes: header, encoding: String.Encoding.utf8)
-            
-            // parse the header
-            //        let http = HTTPHeaderParser(header:headerStr!)
-            
-            // assamble the body from a binary byte array to a string
-            let content = String(bytes:bodyIn, encoding:String.Encoding.utf8)
-            
-            // prepare the failsafe content.
-            //        raw = ["status": http.status, "header": headerStr!, "body": content!]
-            
-            // parse the body data into a json convertible
-            do {
-                if (content?.count)! > 0 {
-                    if (content?.starts(with: "["))! {
-                        let arr = try content?.jsonDecode() as! [Any]
-                        data["response"] = arr
-                    } else {
-                        data = try content?.jsonDecode() as! [String : Any]
-                    }
-                }
-                complete?(data)
-                //            return (http.code, data, raw, http)
-            } catch {
-                complete?([:])
-                //            return (http.code, [:], raw, http)
-            }
-        }
-        
-        
-        
-    }
-    
     
     private static let waitTime = 5
     private static let semaphoreValue = 0
@@ -227,7 +152,7 @@ extension OAuth2 {
     /// Response:
     /// (HTTPResponseStatus, "data" - [String:Any], "raw response" - [String:Any], HTTPHeaderParser)
     public func makeRequest(
-        _ method: PerfectHTTP.HTTPMethod,
+        _ method: HTTPMethod,
         _ url: String,
         body: String = "",
         encoding: String = "JSON",
@@ -238,7 +163,7 @@ extension OAuth2 {
     
         var returnValue = [String:Any]()
         let semaphore = DispatchSemaphore(value: OAuth2.semaphoreValue)
-        let newMethod  = method.convert()
+        let newMethod  = method
         print(newMethod.rawValue)
         OAuth2.makeRequestNIO(newMethod, url, body: body, encoding: encoding, bearerToken: bearerToken) { result in
             returnValue = result
@@ -247,41 +172,6 @@ extension OAuth2 {
         }
         _ = semaphore.wait(timeout: OAuth2.timeOut)
         return returnValue
-        
-    }
-}
-
-
-extension PerfectHTTP.HTTPMethod {
-    func convert() -> NIOHTTP1.HTTPMethod {
-        print(self.description)
-        
-        
-        switch self {
-    
-        case .options:
-            return .OPTIONS
-        case .get:
-            return .GET
-        case .head:
-            return .HEAD
-        case .post:
-            return .POST
-        case .patch:
-            return .PATCH
-        case .put:
-            return .PUT
-        case .delete:
-            return .DELETE
-        case .trace:
-            return .TRACE
-        case .connect:
-            return .CONNECT
-        case .custom(let s):
-            return NIOHTTP1.HTTPMethod(rawValue: s)
-        @unknown default:
-            return NIOHTTP1.HTTPMethod(rawValue: self.description)
-        }
         
     }
 }

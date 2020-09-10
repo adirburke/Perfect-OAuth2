@@ -18,7 +18,7 @@
 //
 
 import PerfectHTTP
-import PerfectSession
+//import PerfectSession
 
 extension HTTPResponse {
 	/// Provides a convenience method for redirects

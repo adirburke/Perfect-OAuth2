@@ -88,7 +88,7 @@ public class Google: OAuth2 {
 		let fields = ["family_name","given_name","id","picture"]
 		let url = "https://www.googleapis.com/oauth2/v2/userinfo?fields=\(fields.joined(separator: "%2C"))&access_token=\(accessToken)"
 		//		let (_, data, _, _) = makeRequest(.get, url)
-		let data = makeRequest(.get, url)
+		let data = makeRequest(.GET, url)
 
 		var out = [String: Any]()
 
@@ -183,7 +183,7 @@ public class Google: OAuth2 {
 
 //        let testTokenURL = "https://localhost:7979/test"
         let testTokenURL = tokenURL
-        let data = makeRequest(.post, testTokenURL, body: urlencode(dict: postBody), encoding: "form")
+        let data = makeRequest(.POST, testTokenURL, body: urlencode(dict: postBody), encoding: "form")
 
         guard let token = OAuth2Token(json: data) else {
             if let error = OAuth2Error(json: data) {
