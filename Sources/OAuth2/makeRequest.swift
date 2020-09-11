@@ -39,15 +39,13 @@ extension OAuth2 {
         case .POST:
             if encoding == "form" {
                 request.headers.add(name: "Content-Type", value: "application/x-www-form-urlencoded")
-            } else
-            {
+            } else {
                 request.headers.add(name: "Content-Type", value: "application/json")
             }
             request.headers.add(name: "Content-length", value: "\(request.body?.length ?? 0)")
         default:
-            break
+            break;
         }
-        //            request.body = nil
         request.body = .string(body)
         
         return self.httpClient.execute(request: request)
