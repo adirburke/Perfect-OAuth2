@@ -8,11 +8,12 @@
 //	Intended to work more independantly of Turnstile
 
 import Foundation
-import PerfectHTTP
-import PerfectNet
+//import PerfectHTTP
+//import PerfectNet
 
 import NIO
 import NIOFoundationCompat
+import AsyncHTTPClient
 
 /**
  OAuth 2 represents the base API Client for an OAuth 2 server that implements the
@@ -33,12 +34,17 @@ open class OAuth2 {
     /// The Token Endpoint of the OAuth 2 Server
     public let tokenURL: String
     
+    public let httpClient : HTTPClient
+    let eventLoopGroup : EventLoopGroup
+    
     /// Creates the OAuth 2 client
-    public init(clientID: String, clientSecret: String, authorizationURL: String, tokenURL: String) {
+    public init(clientID: String, clientSecret: String, authorizationURL: String, tokenURL: String, eventLoopGroup : EventLoopGroup) {
         self.clientID = clientID
         self.clientSecret = clientSecret
         self.authorizationURL = authorizationURL
         self.tokenURL = tokenURL
+        self.eventLoopGroup = eventLoopGroup
+        self.httpClient = HTTPClient(eventLoopGroupProvider: .shared(self.eventLoopGroup), configuration: .init(tlsConfiguration: nil, redirectConfiguration: nil, timeout: .init(), proxy: nil, ignoreUncleanSSLShutdown: true, decompression: .disabled))
     }
     
     
@@ -91,7 +97,7 @@ open class OAuth2 {
                            "redirect_uri": authorizationCode.redirectURL,
                            "code": authorizationCode.code]
         
-        let data = try OAuth2.makeRequestNIO(.POST, tokenURL, body: urlencode(dict: postBody), encoding: "form")
+        let data = try makeRequestNIO(.POST, tokenURL, body: urlencode(dict: postBody), encoding: "form")
         
         return data.flatMapThrowing { response in
                 let decoder = JSONDecoder()

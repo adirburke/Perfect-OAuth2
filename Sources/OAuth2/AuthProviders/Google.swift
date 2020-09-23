@@ -21,6 +21,7 @@
 // https://developers.google.com/identity/protocols/OAuth2
 
 import Foundation
+import NIO
 //import PerfectHTTP
 //import PerfectSession
 //import PerfectNet
@@ -70,11 +71,11 @@ public class Google: OAuth2 {
 	/**
 	Create a Google object. Uses the Client ID and Client Secret obtained when registering the application.
 	*/
-	public init(clientID: String, clientSecret: String) {
+    public init(clientID: String, clientSecret: String, eventLoopGroup : EventLoopGroup) {
 		let tokenURL = "https://www.googleapis.com/oauth2/v4/token"
 		let authorizationURL = "https://accounts.google.com/o/oauth2/auth"
         
-		super.init(clientID: clientID, clientSecret: clientSecret, authorizationURL: authorizationURL, tokenURL: tokenURL)
+        super.init(clientID: clientID, clientSecret: clientSecret, authorizationURL: authorizationURL, tokenURL: tokenURL, eventLoopGroup: eventLoopGroup)
 	}
 
 

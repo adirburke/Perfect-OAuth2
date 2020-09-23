@@ -19,10 +19,12 @@ import NIOFoundationCompat
 
 extension OAuth2 {
     
-    static let httpClient = HTTPClient(eventLoopGroupProvider: .createNew, configuration: .init(tlsConfiguration: nil, redirectConfiguration: nil, timeout: .init(), proxy: nil, ignoreUncleanSSLShutdown: true, decompression: .disabled))
+
+    
+//        HTTPClient(eventLoopGroupProvider: .createNew, configuration: .init(tlsConfiguration: nil, redirectConfiguration: nil, timeout: .init(), proxy: nil, ignoreUncleanSSLShutdown: true, decompression: .disabled))
 //    static let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
     
-    static public func makeRequestNIO(_ method: NIOHTTP1.HTTPMethod,
+    public func makeRequestNIO(_ method: NIOHTTP1.HTTPMethod,
                                       _ url: String,
                                       body: String = "",
                                       encoding: String = "JSON",
@@ -52,7 +54,7 @@ extension OAuth2 {
         
     }
     
-    static public func makeRequestNIO(
+    public func makeRequestNIO(
         _ method: NIOHTTP1.HTTPMethod,
         _ url: String,
         body: String = "",
@@ -163,7 +165,7 @@ extension OAuth2 {
         let semaphore = DispatchSemaphore(value: OAuth2.semaphoreValue)
         let newMethod  = method
         print(newMethod.rawValue)
-        OAuth2.makeRequestNIO(newMethod, url, body: body, encoding: encoding, bearerToken: bearerToken) { result in
+        makeRequestNIO(newMethod, url, body: body, encoding: encoding, bearerToken: bearerToken) { result in
             returnValue = result
             print(result)
             semaphore.signal()
