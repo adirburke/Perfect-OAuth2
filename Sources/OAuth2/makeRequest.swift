@@ -18,12 +18,6 @@ import NIO
 import NIOFoundationCompat
 
 extension OAuth2 {
-    
-
-    
-//        HTTPClient(eventLoopGroupProvider: .createNew, configuration: .init(tlsConfiguration: nil, redirectConfiguration: nil, timeout: .init(), proxy: nil, ignoreUncleanSSLShutdown: true, decompression: .disabled))
-//    static let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
-    
     public func makeRequestNIO(_ method: NIOHTTP1.HTTPMethod,
                                       _ url: String,
                                       body: String = "",
