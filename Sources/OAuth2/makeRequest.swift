@@ -103,6 +103,7 @@ extension OAuth2 {
                             #warning("Clean up the conversion or abstract away")
                             if content.count > 0 {
                                 if (content.starts(with: "[")) {
+                                    
                                     let arr = try content.jsonDecode() as! [Any]
                                     data["response"] = arr
                                 } else {
