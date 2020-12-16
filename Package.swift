@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "OAuth2",
+    platforms: [ .macOS(.v10_15)],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(name: "OAuth2", targets: ["OAuth2"]),
@@ -13,6 +14,9 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
+//        .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0-beta"),
+        .package(url: "https://github.com/vapor-community/google-cloud-kit.git", from: "1.0.0-alpha.1"),
+        .package(url: "https://github.com/GottaGetSwifty/CodableWrappers.git", .upToNextMajor(from: "1.1.0" )),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -20,7 +24,9 @@ let package = Package(
         .target(
             name: "OAuth2",
             dependencies: [ .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                            ]),
+                            .product(name: "GoogleCloudCore", package: "google-cloud-kit"),
+                            "CodableWrappers"]
+        ),
         .testTarget(
             name: "Perfect-OAuth2Tests",
             dependencies: ["OAuth2"]),
