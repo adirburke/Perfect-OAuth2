@@ -27,7 +27,7 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
 //        .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0-beta"),
-        .package(url: "https://\(username):\(password)@github.com/adirburke/google-cloud-kit.git", .branch("master")),
+        .package(url: "https://\(username):\(password)@github.com/adirburke/GoogleCloudKit.git", .branch("master")),
         .package(url: "https://github.com/GottaGetSwifty/CodableWrappers.git", .upToNextMajor(from: "1.1.0" )),
     ],
     targets: [
