@@ -27,17 +27,14 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
 //        .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0-beta"),
-        .package(name: "google-cloud-kit", url: "https://\(username):\(password)@github.com/adirburke/GoogleCloudKit.git", .branch("master")),
-        .package(url: "https://github.com/GottaGetSwifty/CodableWrappers.git", .upToNextMajor(from: "1.1.0" )),
+
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "OAuth2",
-            dependencies: [ .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                            .product(name: "GoogleCloudCore", package: "google-cloud-kit"),
-                            "CodableWrappers"]
+            dependencies: [ .product(name: "AsyncHTTPClient", package: "async-http-client")]
         ),
         .testTarget(
             name: "Perfect-OAuth2Tests",
@@ -57,8 +54,6 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
 //        .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0-beta"),
-        .package(url: "https://github.com/adirburke/google-cloud-kit.git", .branch("master")),
-        .package(url: "https://github.com/GottaGetSwifty/CodableWrappers.git", .upToNextMajor(from: "1.1.0" )),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -66,8 +61,7 @@ let package = Package(
         .target(
             name: "OAuth2",
             dependencies: [ .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                            .product(name: "GoogleCloudCore", package: "google-cloud-kit"),
-                            "CodableWrappers"]
+                            ]
         ),
         .testTarget(
             name: "Perfect-OAuth2Tests",
