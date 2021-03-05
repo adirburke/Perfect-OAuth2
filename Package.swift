@@ -4,6 +4,8 @@
 import PackageDescription
 import Foundation
 
+let package : Package
+
 #if os(Linux)
 let isLinux = true
 #else
@@ -11,11 +13,11 @@ let isLinux = false
 #endif
 if isLinux {
 
-let username = ProcessInfo.processInfo.environment["GITHUBNAME"] ?? ""
-let password =  ProcessInfo.processInfo.environment["GITHUBSECRET"] ?? ""
+// let username = ProcessInfo.processInfo.environment["GITHUBNAME"] ?? ""
+// let password =  ProcessInfo.processInfo.environment["GITHUBSECRET"] ?? ""
 
 
-let package = Package(
+package = Package(
     name: "OAuth2",
     platforms: [ .macOS(.v10_15)],
     products: [
@@ -25,7 +27,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
+        .package(name: "async-http-client", url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
 //        .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0-beta"),
 
     ],
@@ -42,7 +44,7 @@ let package = Package(
     ]
 )
 } else {
-  let package = Package(
+  package = Package(
     name: "OAuth2",
     platforms: [ .macOS(.v10_15)],
     products: [
@@ -52,7 +54,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
+       .package(name: "async-http-client", url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
 //        .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0-beta"),
     ],
     targets: [
