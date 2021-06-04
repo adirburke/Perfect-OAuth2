@@ -57,7 +57,7 @@ public class OAuth2Token : Codable {
         self.accessToken = try values.decode(String.self, forKey: .accessToken)
         self.tokenType = try? values.decode(String.self, forKey: .tokenType)
         self.refreshToken = try? values.decode(String.self, forKey: .refreshToken)
-        let test = try? values.decode(Date.self, forKey: .expiration)
+//        _ = try? values.decode(Date.self, forKey: .expiration)
         let expiresIn = try? values.decode(Int.self, forKey: .expiration)
         self.expiration = Date().addingTimeInterval(TimeInterval(expiresIn ?? 3660))
         self.scope = try? values.decode(String.self, forKey: .scope).components(separatedBy: " ")
